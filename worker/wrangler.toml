@@ -1,0 +1,20 @@
+name = "windows-remote-control"
+main = "src/index.js"
+compatibility_date = "2026-08-08"
+
+# Durable Object binding for WebSocket broker
+[[durable_objects.bindings]]
+name = "CONTROL"
+class_name = "ControlServer"
+
+# DO migration — SQLite-backed (required for free plan)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ControlServer"]
+
+# KV namespace for user accounts & tokens
+# Run: wrangler kv:namespace create USERS
+# Then replace the id below with the output
+[[kv_namespaces]]
+binding = "USERS"
+id = "0084bc4859b14c4ba67189a404e8eaa1"
