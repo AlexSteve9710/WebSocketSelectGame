@@ -15,188 +15,177 @@ const HTML = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>远程控制中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;background:#0f0f1e;color:#e4e6eb;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;position:relative}
-
-/* Animated aurora background */
-.aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.aurora::before,.aurora::after{content:'';position:absolute;width:60vw;height:60vw;border-radius:50%;filter:blur(80px);opacity:.6}
-.aurora::before{top:-20%;left:-10%;background:radial-gradient(circle,#7c3aed 0%,transparent 70%);animation:float1 20s ease-in-out infinite}
-.aurora::after{bottom:-20%;right:-10%;background:radial-gradient(circle,#06b6d4 0%,transparent 70%);animation:float2 25s ease-in-out infinite}
-.aurora .blob3{position:absolute;top:30%;right:20%;width:40vw;height:40vw;border-radius:50%;filter:blur(80px);opacity:.4;background:radial-gradient(circle,#ec4899 0%,transparent 70%);animation:float3 18s ease-in-out infinite}
-@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20vw,10vh) scale(1.2)}}
-@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-15vw,-10vh) scale(1.1)}}
-@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-10vw,15vh) scale(1.3)}}
-
-/* Grid overlay */
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:40px 40px;z-index:0;pointer-events:none}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;background:#F7F4EF;color:#1F2421;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;position:relative;font-weight:300;line-height:1.6}
 
 /* Header */
-.header{position:relative;z-index:2;text-align:center;padding:56px 20px 32px}
-.header .logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#7c3aed,#ec4899);margin-bottom:18px;box-shadow:0 20px 40px -10px rgba(124,58,237,.6),0 0 0 1px rgba(255,255,255,.1) inset;font-size:32px}
-.header h1{font-size:32px;font-weight:700;color:#fff;letter-spacing:-.5px;margin-bottom:6px}
-.header h1 .gradient{background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.header .subtitle{font-size:13px;color:#9ca3af;font-weight:500;letter-spacing:3px;text-transform:uppercase}
+.header{position:relative;z-index:2;text-align:center;padding:80px 20px 48px;max-width:1200px;margin:0 auto;width:100%}
+.header .eyebrow{display:inline-block;padding:6px 16px;background:#F2E3D6;color:#C4612F;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;border-radius:999px;margin-bottom:20px}
+.header h1{font-family:'Fraunces',serif;font-size:56px;font-weight:400;color:#1F2421;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1}
+.header h1 .highlight{font-style:italic;color:#C4612F}
+.header .subtitle{font-size:18px;color:#5C635D;font-weight:300;max-width:560px;margin:0 auto;line-height:1.6}
 
-/* Glass panel base */
-.glass{background:rgba(24,24,42,.7);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid rgba(255,255,255,.08);border-radius:20px;box-shadow:0 20px 60px -20px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset}
+/* Sticky nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(251,249,245,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #E7E1D7;padding:16px 0;margin-bottom:40px}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center}
+.nav .brand{font-family:'Fraunces',serif;font-size:20px;color:#1F2421;font-weight:400;letter-spacing:-.5px}
+.nav .user-info{display:flex;align-items:center;gap:12px}
+.nav .avatar{width:36px;height:36px;border-radius:999px;background:#C4612F;display:flex;align-items:center;justify-content:center;color:#FBF9F5;font-weight:600;font-size:14px}
+.nav .username{font-weight:500;color:#1F2421;font-size:15px}
+
+/* Card base */
+.card{background:#FFFFFF;border:1px solid #E7E1D7;border-radius:16px;box-shadow:0 1px 3px rgba(31,36,33,.04)}
 
 /* Login card */
-.login-wrap{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;padding:20px;flex:1}
-.login-card{width:100%;max-width:420px;padding:44px 40px;animation:slideUp .6s cubic-bezier(.22,1,.36,1)}
+.login-wrap{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;padding:40px 20px;flex:1}
+.login-card{width:100%;max-width:440px;padding:48px;animation:slideUp .6s cubic-bezier(.22,1,.36,1)}
 @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-.login-card h2{color:#fff;font-size:24px;font-weight:600;margin-bottom:6px;letter-spacing:-.3px}
-.login-card .hint{color:#9ca3af;font-size:13px;margin-bottom:28px}
-.login-card label{display:block;font-size:12px;color:#9ca3af;margin-bottom:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-.login-card input{width:100%;padding:13px 16px;margin-bottom:18px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:14px;outline:none;transition:all .2s;font-weight:500}
-.login-card input::placeholder{color:#4b5563}
-.login-card input:focus{border-color:#a78bfa;background:rgba(0,0,0,.4);box-shadow:0 0 0 3px rgba(167,139,250,.15)}
-.login-card button{width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px -8px rgba(124,58,237,.6);letter-spacing:.3px}
-.login-card button:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(124,58,237,.8)}
+.login-card h2{font-family:'Fraunces',serif;color:#1F2421;font-size:32px;font-weight:400;margin-bottom:8px;letter-spacing:-.8px}
+.login-card .hint{color:#5C635D;font-size:15px;margin-bottom:32px;font-weight:300}
+.login-card label{display:block;font-size:13px;color:#5C635D;margin-bottom:8px;font-weight:500}
+.login-card input{width:100%;padding:14px 16px;margin-bottom:20px;background:#FBF9F5;border:1px solid #E7E1D7;border-radius:12px;color:#1F2421;font-size:15px;outline:none;transition:all .2s;font-weight:400}
+.login-card input::placeholder{color:#9CA3AF}
+.login-card input:focus{border-color:#C4612F;background:#FFFFFF;box-shadow:0 0 0 3px rgba(196,97,47,.08)}
+.login-card button{width:100%;padding:14px;background:#C4612F;color:#FFFFFF;border:none;border-radius:999px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.login-card button:hover{background:#A94E22;transform:translateY(-2px);box-shadow:0 4px 12px rgba(196,97,47,.25)}
 .login-card button:active{transform:translateY(0)}
-.login-err{color:#f87171;text-align:center;margin-top:14px;font-size:13px;display:none;font-weight:500;padding:10px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:10px}
+.login-err{color:#C4612F;text-align:center;margin-top:16px;font-size:14px;display:none;font-weight:400;padding:12px;background:#F2E3D6;border:1px solid #E7E1D7;border-radius:10px}
 
 /* Dashboard */
-.dashboard{position:relative;z-index:2;display:none;max-width:1280px;margin:0 auto;padding:24px 20px 60px;width:100%}
-
-/* Top bar */
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;margin-bottom:20px}
-.topbar .user-info{display:flex;align-items:center;gap:12px}
-.topbar .avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px}
-.topbar .user{font-weight:600;color:#fff;font-size:15px}
-.topbar .user small{display:block;color:#9ca3af;font-size:11px;font-weight:400;margin-top:2px}
-.topbar button{padding:10px 20px;background:rgba(255,255,255,.05);color:#e4e6eb;border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
-.topbar button:hover{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#f87171}
+.dashboard{position:relative;z-index:2;display:none;max-width:1200px;margin:0 auto;padding:0 20px 80px;width:100%}
 
 /* Section header */
-.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:0 4px}
-.section-head h3{font-size:14px;color:#9ca3af;font-weight:600;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.section-head h3::before{content:'';width:3px;height:14px;background:linear-gradient(180deg,#a78bfa,#ec4899);border-radius:2px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding:0 4px}
+.section-head h3{font-family:'Fraunces',serif;font-size:24px;color:#1F2421;font-weight:400;letter-spacing:-.5px}
+
+/* Buttons */
+.btn-primary{padding:12px 24px;background:#C4612F;color:#FFFFFF;border:none;border-radius:999px;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s;letter-spacing:.2px}
+.btn-primary:hover{background:#A94E22;transform:translateY(-2px);box-shadow:0 4px 12px rgba(196,97,47,.25)}
+.btn-secondary{padding:10px 20px;background:#FBF9F5;color:#5C635D;border:1px solid #E7E1D7;border-radius:999px;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s}
+.btn-secondary:hover{background:#FFFFFF;border-color:#C4612F;color:#C4612F}
 
 /* Token section */
-.token-section{padding:22px 24px;margin-bottom:20px}
-.btn-primary{padding:9px 18px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;box-shadow:0 6px 20px -6px rgba(124,58,237,.5)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px -6px rgba(124,58,237,.7)}
-.token-list{display:flex;flex-direction:column;gap:10px}
-.token-item{display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px 18px;font-size:13px;transition:all .2s}
-.token-item:hover{border-color:rgba(167,139,250,.3);background:rgba(0,0,0,.35)}
-.token-item .tok-label{color:#fff;font-weight:600;min-width:110px;display:flex;align-items:center;gap:8px}
-.token-item .tok-label::before{content:'🔑';font-size:14px}
-.token-item .tok-id{color:#9ca3af;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.token-item .tok-time{color:#6b7280;font-size:11px;white-space:nowrap}
-.token-item button{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;background:transparent}
-.btn-copy{color:#60a5fa;border-color:rgba(96,165,250,.3)}
-.btn-copy:hover{background:rgba(96,165,250,.15);border-color:#60a5fa}
-.btn-revoke{color:#f87171;border-color:rgba(248,113,113,.3)}
-.btn-revoke:hover{background:rgba(248,113,113,.15);border-color:#f87171}
-.token-empty{color:#6b7280;font-size:13px;text-align:center;padding:20px;background:rgba(0,0,0,.15);border-radius:10px;border:1px dashed rgba(255,255,255,.08)}
+.token-section{padding:32px;margin-bottom:32px}
+.token-list{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.token-item{display:flex;align-items:center;gap:16px;background:#FBF9F5;border:1px solid #E7E1D7;border-radius:12px;padding:16px 20px;font-size:14px;transition:all .2s}
+.token-item:hover{border-color:#C4612F;background:#FFFFFF;transform:translateY(-1px);box-shadow:0 2px 8px rgba(31,36,33,.06)}
+.token-item .tok-label{color:#1F2421;font-weight:500;min-width:120px;display:flex;align-items:center;gap:10px}
+.token-item .tok-label::before{content:'🔑';font-size:16px}
+.token-item .tok-id{color:#5C635D;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.token-item .tok-time{color:#9CA3AF;font-size:12px;white-space:nowrap;font-weight:400}
+.token-item button{padding:8px 16px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;background:transparent}
+.btn-copy{color:#C4612F;border-color:#E7E1D7}
+.btn-copy:hover{background:#F2E3D6;border-color:#C4612F}
+.btn-revoke{color:#5C635D;border-color:#E7E1D7}
+.btn-revoke:hover{background:#E7E1D7;border-color:#5C635D}
+.token-empty{color:#5C635D;font-size:14px;text-align:center;padding:32px;background:#FBF9F5;border-radius:12px;border:1px dashed #E7E1D7;font-weight:300}
 
 /* Toast */
-.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:0 20px 40px -10px rgba(16,185,129,.5);display:flex;align-items:center;gap:10px}
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-100px);background:#C4612F;color:#FFFFFF;padding:14px 28px;border-radius:999px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:all .3s cubic-bezier(.22,1,.36,1);box-shadow:0 4px 16px rgba(196,97,47,.25);display:flex;align-items:center;gap:10px}
 .toast::before{content:'✓';font-size:16px;font-weight:700}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* Device grid */
-.device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:20px}
-.device-card{padding:22px;transition:all .25s;position:relative;overflow:hidden}
-.device-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#6b7280,#4b5563);transition:all .3s}
-.device-card.online::before{background:linear-gradient(90deg,#10b981,#06b6d4)}
-.device-card.online{box-shadow:0 20px 60px -20px rgba(16,185,129,.2),0 0 0 1px rgba(16,185,129,.15) inset}
-.device-card:hover{transform:translateY(-3px);box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
+.device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;margin-bottom:32px}
+.device-card{padding:28px;transition:all .25s;position:relative;overflow:hidden}
+.device-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#E7E1D7;transition:all .3s}
+.device-card.online::before{background:#C4612F}
+.device-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(31,36,33,.08)}
 .device-card.offline{opacity:.6}
-.device-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;position:relative}
-.dot.online{background:#10b981}
-.dot.online::before{content:'';position:absolute;inset:-4px;border-radius:50%;background:#10b981;opacity:.4;animation:pulse-ring 2s ease-in-out infinite}
-@keyframes pulse-ring{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.2);opacity:0}}
-.dot.offline{background:#6b7280}
-.device-name{font-size:17px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.2px}
-.device-status{font-size:11px;color:#9ca3af;margin-left:auto;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.05)}
-.device-card.online .device-status{color:#10b981;background:rgba(16,185,129,.1)}
-.app-row{display:flex;flex-direction:column;gap:8px}
-.app-chip{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;font-size:13px;transition:all .15s}
-.app-chip:hover{border-color:rgba(255,255,255,.12);background:rgba(0,0,0,.35)}
-.app-chip .app-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#4b5563,#374151);display:flex;align-items:center;justify-content:center;color:#e4e6eb;font-weight:700;font-size:11px;flex-shrink:0}
-.device-card.online .app-chip .app-icon{background:linear-gradient(135deg,#7c3aed,#ec4899)}
-.app-chip .app-label{color:#e4e6eb;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.app-chip button{padding:6px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;background:transparent}
-.btn-on{color:#10b981;border-color:rgba(16,185,129,.3)}
-.btn-on:hover{background:#10b981;color:#fff;border-color:#10b981}
-.btn-off{color:#f87171;border-color:rgba(248,113,113,.3)}
-.btn-off:hover{background:#f87171;color:#fff;border-color:#f87171}
-.app-chip .no-ctrl{font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.03)}
+.device-head{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.status-badge{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;letter-spacing:.3px}
+.status-badge.online{background:#F2E3D6;color:#C4612F}
+.status-badge.offline{background:#E7E1D7;color:#5C635D}
+.status-badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.status-badge.online::before{background:#C4612F}
+.status-badge.offline::before{background:#9CA3AF}
+.device-name{font-family:'Fraunces',serif;font-size:20px;font-weight:400;color:#1F2421;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.3px;flex:1}
+.app-row{display:flex;flex-direction:column;gap:10px}
+.app-chip{display:flex;align-items:center;gap:12px;background:#FBF9F5;border:1px solid #E7E1D7;border-radius:12px;padding:12px 16px;font-size:14px;transition:all .15s}
+.app-chip:hover{border-color:#C4612F;background:#FFFFFF}
+.app-chip .app-icon{width:32px;height:32px;border-radius:8px;background:#F2E3D6;display:flex;align-items:center;justify-content:center;color:#C4612F;font-weight:600;font-size:12px;flex-shrink:0}
+.device-card.online .app-chip .app-icon{background:#C4612F;color:#FFFFFF}
+.app-chip .app-label{color:#1F2421;font-weight:400;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-chip button{padding:8px 16px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;background:transparent}
+.btn-on{color:#C4612F;border-color:#E7E1D7}
+.btn-on:hover{background:#C4612F;color:#FFFFFF;border-color:#C4612F}
+.btn-off{color:#5C635D;border-color:#E7E1D7}
+.btn-off:hover{background:#5C635D;color:#FFFFFF;border-color:#5C635D}
+.app-chip .no-ctrl{font-size:11px;color:#9CA3AF;font-weight:500;padding:6px 12px;border-radius:999px;background:#F7F4EF}
 
 /* Empty state */
-.empty{text-align:center;padding:60px 20px;color:#9ca3af;grid-column:1/-1;font-size:14px;background:rgba(255,255,255,.02);border-radius:16px;border:1px dashed rgba(255,255,255,.08)}
-.empty .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
-.empty .empty-title{font-size:16px;color:#e4e6eb;font-weight:600;margin-bottom:6px}
+.empty{text-align:center;padding:80px 20px;color:#5C635D;grid-column:1/-1;font-size:15px;background:#FBF9F5;border-radius:16px;border:1px dashed #E7E1D7;font-weight:300}
+.empty .empty-icon{font-size:56px;margin-bottom:16px;opacity:.6}
+.empty .empty-title{font-family:'Fraunces',serif;font-size:20px;color:#1F2421;font-weight:400;margin-bottom:8px;letter-spacing:-.3px}
 
 /* Log panel */
-.log-wrap{padding:20px 24px;max-height:280px;overflow-y:auto}
-.log-line{font-size:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);color:#9ca3af;display:flex;align-items:baseline;gap:10px}
+.log-wrap{padding:32px;max-height:320px;overflow-y:auto}
+.log-line{font-size:13px;padding:10px 0;border-bottom:1px solid #E7E1D7;color:#5C635D;display:flex;align-items:baseline;gap:12px;font-weight:300}
 .log-line:last-child{border-bottom:none}
-.log-line .t{color:#4b5563;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-weight:500;flex-shrink:0;font-size:11px}
-.log-line.ok{color:#34d399}
-.log-line.err{color:#f87171}
+.log-line .t{color:#9CA3AF;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-weight:400;flex-shrink:0;font-size:12px}
+.log-line.ok{color:#C4612F;font-weight:400}
+.log-line.err{color:#5C635D;font-weight:400}
 .log-line .msg{flex:1;word-break:break-all}
 
 /* CMD shell */
-.cmd-row{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
-.cmd-row input{flex:1;padding:9px 12px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#e4e6eb;font-size:12px;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;outline:none;transition:all .15s}
-.cmd-row input::placeholder{color:#4b5563}
-.cmd-row input:focus{border-color:#a78bfa;background:rgba(0,0,0,.5)}
-.cmd-row button{padding:9px 16px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
-.cmd-row button:hover{transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(124,58,237,.6)}
-.cmd-output{margin-top:10px;background:#000;border-radius:10px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:11px;color:#e4e6eb;max-height:180px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;display:none;border:1px solid rgba(255,255,255,.05)}
+.cmd-row{display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid #E7E1D7}
+.cmd-row input{flex:1;padding:10px 14px;background:#FBF9F5;border:1px solid #E7E1D7;border-radius:12px;color:#1F2421;font-size:13px;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;outline:none;transition:all .15s;font-weight:400}
+.cmd-row input::placeholder{color:#9CA3AF}
+.cmd-row input:focus{border-color:#C4612F;background:#FFFFFF}
+.cmd-row button{padding:10px 18px;background:#C4612F;color:#FFFFFF;border:none;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.cmd-row button:hover{background:#A94E22;transform:translateY(-1px)}
+.cmd-output{margin-top:12px;background:#1F2421;border-radius:12px;padding:16px;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:12px;color:#FBF9F5;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;display:none;border:1px solid #E7E1D7}
 .cmd-output.show{display:block}
-.cmd-output .cmd-ok{color:#34d399;font-weight:600}
-.cmd-output .cmd-err{color:#f87171;font-weight:600}
+.cmd-output .cmd-ok{color:#C4612F;font-weight:500}
+.cmd-output .cmd-err{color:#F2E3D6;font-weight:500}
 
 /* Scrollbar */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(167,139,250,.3);border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:rgba(167,139,250,.5)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#F7F4EF}
+::-webkit-scrollbar-thumb{background:#E7E1D7;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#C4612F}
 
 /* Mobile */
 @media(max-width:768px){
-  .header{padding:36px 15px 20px}
-  .header h1{font-size:24px}
-  .header .subtitle{font-size:11px;letter-spacing:2px}
-  .header .logo{width:52px;height:52px;font-size:26px}
-  .login-card{padding:32px 24px}
-  .dashboard{padding:16px 12px 40px}
-  .device-grid{grid-template-columns:1fr;gap:12px}
-  .device-card{padding:18px}
-  .topbar{padding:14px 18px;flex-direction:column;gap:14px;align-items:stretch}
-  .topbar button{width:100%}
-  .topbar .user-info{justify-content:center}
-  .token-section{padding:18px}
-  .section-head{flex-direction:column;gap:12px;align-items:stretch}
-  .token-item{flex-wrap:wrap;padding:12px 14px;gap:10px}
+  .header{padding:48px 20px 32px}
+  .header h1{font-size:36px}
+  .header .subtitle{font-size:16px}
+  .header .eyebrow{font-size:10px;padding:5px 12px}
+  .login-card{padding:36px 28px}
+  .dashboard{padding:0 16px 60px}
+  .device-grid{grid-template-columns:1fr;gap:16px}
+  .device-card{padding:24px}
+  .nav-inner{flex-direction:column;gap:16px;align-items:stretch}
+  .nav .user-info{justify-content:center}
+  .token-section{padding:24px}
+  .section-head{flex-direction:column;gap:16px;align-items:stretch}
+  .section-head h3{font-size:20px}
+  .token-item{flex-wrap:wrap;padding:16px;gap:12px}
   .token-item .tok-label{min-width:auto;width:100%}
   .token-item .tok-id{width:100%;order:3}
   .token-item .tok-time{order:4}
-  .device-name{font-size:15px}
-  .log-wrap{padding:16px 18px}
+  .device-name{font-size:18px}
+  .log-wrap{padding:24px}
 }
 </style>
 </head>
 <body>
-<div class="aurora"><div class="blob3"></div></div>
 
 <div class="header">
-  <div class="logo">⚡</div>
-  <h1><span class="gradient">切盘工具</span></h1>
-  <div class="subtitle">Remote Control Center</div>
+  <div class="eyebrow">远程控制系统</div>
+  <h1>切盘<span class="highlight">工具</span></h1>
+  <div class="subtitle">集中管理您的游戏设备，远程控制应用启动与关闭</div>
 </div>
 
 <div class="login-wrap" id="loginBlock">
-  <div class="login-card glass">
+  <div class="login-card card">
     <h2>欢迎回来</h2>
-    <div class="hint">请登录你的管理员账号</div>
+    <div class="hint">请登录您的管理员账号</div>
     <label for="u">用户名</label>
     <input id="u" autocomplete="username" placeholder="请输入用户名">
     <label for="p">密码</label>
@@ -206,26 +195,29 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
   </div>
 </div>
 
-<div class="dashboard" id="dash">
-  <div class="topbar glass">
+<div class="nav" id="navBar" style="display:none">
+  <div class="nav-inner">
+    <div class="brand">切盘工具</div>
     <div class="user-info">
       <div class="avatar" id="userAvatar">U</div>
-      <div class="user"><span id="userLabel"></span><small>管理员</small></div>
+      <div class="username" id="userLabel"></div>
+      <button class="btn-secondary" id="logoutBtn">退出登录</button>
     </div>
-    <button id="logoutBtn">退出登录</button>
   </div>
+</div>
 
-  <div class="token-section glass">
+<div class="dashboard" id="dash">
+  <div class="token-section card">
     <div class="section-head">
       <h3>设备令牌</h3>
-      <button id="createTokenBtn" class="btn-primary">＋ 生成新令牌</button>
+      <button id="createTokenBtn" class="btn-primary">生成新令牌</button>
     </div>
     <div class="token-list" id="tokenList">
       <div class="token-empty">加载中…</div>
     </div>
   </div>
 
-  <div class="section-head" style="margin-top:24px">
+  <div class="section-head">
     <h3>设备列表</h3>
   </div>
   <div class="device-grid" id="grid">
@@ -236,10 +228,10 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
     </div>
   </div>
 
-  <div class="section-head" style="margin-top:24px">
+  <div class="section-head" style="margin-top:48px">
     <h3>操作日志</h3>
   </div>
-  <div class="log-wrap glass"><div id="log"></div></div>
+  <div class="log-wrap card"><div id="log"></div></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -261,6 +253,7 @@ $$('loginBtn').onclick=async function(){
     if(d.ok){
       token=d.token;
       $$('loginBlock').style.display='none';
+      $$('navBar').style.display='block';
       $$('dash').style.display='block';
       $$('userLabel').textContent=d.username;
       $$('userAvatar').textContent=(d.username||'U')[0].toUpperCase();
@@ -309,11 +302,10 @@ function render(){
     var co=cmdOut[id],coHtml='';
     if(co){coHtml='<div class="cmd-output show"><span class="'+(co.ok?'cmd-ok':'cmd-err')+'">$ '+esc(co.cmd)+'</span>\\n'+esc(co.out||'')+'</div>'}
     else{coHtml='<div class="cmd-output"></div>'}
-    return '<div class="device-card glass '+(on?'online':'offline')+'">'
+    return '<div class="device-card card '+(on?'online':'offline')+'">'
       +'<div class=device-head>'
-        +'<span class="dot '+(on?'online':'offline')+'"></span>'
         +'<span class=device-name>'+esc(d.hostname||id)+'</span>'
-        +'<span class=device-status>'+(on?'在线':'离线')+'</span>'
+        +'<span class="status-badge '+(on?'online':'offline')+'">'+(on?'在线':'离线')+'</span>'
       +'</div>'
       +'<div class=app-row>'+(d.apps||[]).map(function(a){
         return '<div class=app-chip>'
@@ -410,6 +402,7 @@ $$('logoutBtn').onclick=function(){
   if(ws)ws.close();
   token='';devices={};tokenList=[];
   $$('loginBlock').style.display='flex';
+  $$('navBar').style.display='none';
   $$('dash').style.display='none';
   $$('u').value='';$$('p').value='';
   grid.innerHTML='<div class=empty><div class=empty-icon>🖥️</div><div class=empty-title>暂无设备</div><div>等待 Agent 连接…</div></div>';
