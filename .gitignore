@@ -1,5 +1,28 @@
+# Dependencies
 node_modules/
+.npm/
+
+# Build outputs
+windows-agent/bin/
+windows-agent/obj/
+windows-agent/binpublish/
+windows-agent/publish/
+
+# Cloudflare
 .wrangler/
-dist/
-*.log
+worker/
+.dev.vars
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Config (contains secrets)
+config.ini
+windows-agent/config.ini
