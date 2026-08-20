@@ -494,7 +494,7 @@ button:disabled { opacity:.55; cursor:not-allowed; }
      登录页
      ============================================================ -->
 <div class="login-wrap" id="loginBlock">
-  <div class="login-card card">
+  <form class="login-card card" id="loginForm" autocomplete="on">
     <div class="login-brand">
       <h1>远程控制中心</h1>
       <p>使用管理员账号登录</p>
@@ -503,9 +503,9 @@ button:disabled { opacity:.55; cursor:not-allowed; }
     <input id="u" name="username" autocomplete="username" placeholder="请输入用户名" autofocus required>
     <label for="p">密码</label>
     <input id="p" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
-    <button id="loginBtn" class="btn-primary" type="button">登录</button>
+    <button id="loginBtn" class="btn-primary" type="submit">登录</button>
     <div class="login-err" id="loginErr"></div>
-  </div>
+  </form>
 </div>
 
 <!-- ============================================================
@@ -579,7 +579,7 @@ function $$(id){return document.getElementById(id)}
 function toast(msg,isErr){const t=$$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
 const logEl=$$('log'),grid=$$('grid');
 
-$$('loginBtn').onclick=async function(){
+$$('loginForm').addEventListener('submit',async function(e){e.preventDefault();
   const u=$$('u').value.trim(),p=$$('p').value.trim();
   if(!u||!p){$$('loginErr').textContent='请输入用户名和密码';$$('loginErr').style.display='block';return}
   const btn=$$('loginBtn'),ot=btn.textContent;btn.textContent='登录中…';btn.disabled=true;
