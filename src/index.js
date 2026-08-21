@@ -573,15 +573,19 @@ button:disabled { opacity:.55; cursor:not-allowed; }
      ============================================================ -->
 <div class="toast" id="toast"></div>
 <script>
-let token=[REDACTED],ws=null,rTimer=null,devices={},tokenList=[],cmdOut={};
+// State
+let token='', ws=null, rTimer=null, devices={}, tokenList=[], cmdOut={};
+
+// Helpers
 function L(msg,ok){const e=logEl,t=new Date().toLocaleTimeString(),c=ok===true?'ok':ok===false?'err':'';e.innerHTML+='<div class="log-line '+c+'"><span class=t>'+t+'</span><span class=msg>'+msg+'</span></div>';e.parentElement.scrollTop=e.parentElement.scrollHeight}
 function $$(id){return document.getElementById(id)}
 function toast(msg,isErr){const t=$$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
-const logEl=$$('log'),grid=$$('grid');
+const logEl=$$('log'), grid=$$('grid');
 
+// Login ─── exact copy from reference worker
 $$('loginBtn').onclick=async function(){
   const u=$$('u').value.trim(),p=$$('p').value.trim();
-  if(!u||!p){$$('loginErr').textContent='请输入用户名和密码';$$('loginErr').style.display='block';return}
+  if(!u||!p)return;
   const btn=$$('loginBtn'),ot=btn.textContent;btn.textContent='登录中…';btn.disabled=true;
   try{
     const r=await fetch('/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p})});
@@ -589,12 +593,12 @@ $$('loginBtn').onclick=async function(){
     if(d.ok){
       token=d.token;
       $$('loginBlock').style.display='none';
-      $$('navBar').style.display='block';
+      $$('navBar').style.display='flex';
       $$('dash').style.display='block';
       $$('userLabel').textContent=d.username;
       $$('userAvatar').textContent=(d.username||'U')[0].toUpperCase();
       $$('loginErr').style.display='none';
-      L('登录成功');connect();loadTokens();
+      L('登录成功',true);connect();loadTokens();
     }else{$$('loginErr').textContent=d.error||'登录失败';$$('loginErr').style.display='block'}
   }catch(e){$$('loginErr').textContent='网络错误';$$('loginErr').style.display='block'}
   finally{btn.textContent=ot;btn.disabled=false}
@@ -602,15 +606,17 @@ $$('loginBtn').onclick=async function(){
 $$('p').onkeydown=function(e){if(e.key==='Enter')$$('loginBtn').click()};
 $$('u').onkeydown=function(e){if(e.key==='Enter')$$('p').focus()};
 
+// WebSocket ─── exact copy from reference worker
 function connect(){
   if(ws){try{ws.close()}catch(e){}}
   var proto=location.protocol==='https:'?'wss:':'ws:';
   ws=new WebSocket(proto+'//'+location.host+'/ws?token='+token);
-  ws.onopen=function(){L('已连接到服务器');ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}}
+  ws.onopen=function(){L('已连接到服务器',true);ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}}
   ws.onmessage=function(e){try{handle(JSON.parse(e.data))}catch(ex){}}
-  ws.onclose=function(){L('连接断开，5秒后重连…');if(!rTimer)rTimer=setTimeout(connect,5000)}
+  ws.onclose=function(){L('连接断开，5秒后重连…',false);if(!rTimer)rTimer=setTimeout(connect,5000)}
   ws.onerror=function(){}
 }
+
 function handle(m){
   switch(m.type){
     case'device_list':
@@ -650,14 +656,14 @@ function render(){
           +'<span class=app-label>'+esc(a)+'</span>'
           +(on
             ?'<span class=app-actions>'
-              +'<button class=btn-on onclick="S(\\''+id+'\\',\\'start\\',\\''+esc(a)+'\\')">启动</button>'
-              +'<button class=btn-off onclick="S(\\''+id+'\\',\\'stop\\',\\''+esc(a)+'\\')">关闭</button>'
+              +'<button class=btn-on onclick="S(\''+id+'\',\'start\',\''+esc(a)+'\')">启动</button>'
+              +'<button class=btn-off onclick="S(\''+id+'\',\'stop\',\''+esc(a)+'\')">关闭</button>'
               +'</span>'
             :'<span class=no-ctrl>离线</span>')
           +'</div>';
       }).join('')+'</div>'
       +(on
-        ?'<div class=cmd-row><span class=cmd-prompt>&gt;</span><input id="cmdin-'+esc(id)+'" placeholder="输入命令…" onkeydown="if(event.key===\\'Enter\\')execCmd(\\''+esc(id)+'\\')"><button class=btn-cmd onclick="execCmd(\\''+esc(id)+'\\')">执行</button></div>'
+        ?'<div class=cmd-row><span class=cmd-prompt>&gt;</span><input id="cmdin-'+esc(id)+'" placeholder="输入命令…" onkeydown="if(event.key===\'Enter\')execCmd(\''+esc(id)+'\')"><button class=btn-cmd onclick="execCmd(\''+esc(id)+'\')">执行</button></div>'
         :'')
       +coHtml
     +'</div>';
@@ -685,7 +691,12 @@ function execCmd(deviceId){
 
 async function loadTokens(){
   try{
-    var r=await fetch('/tokens?token=[REDACTED]tokenList');
+    var r=await fetch('/tokens?token='+token);
+    var d=await r.json();
+    if(d.ok)tokenList=d.tokens||[];
+    else tokenList=[];
+  }catch(e){tokenList=[]}
+  var el=$$('tokenList');
   if(!tokenList.length){el.innerHTML='<div class=token-empty><div class=empty-icon>🔑</div>暂无设备令牌，点击上方按钮生成</div>';return}
   el.innerHTML=tokenList.map(function(t){
     var d=new Date(t.createdAt),ts=d.toLocaleDateString()+' '+d.toLocaleTimeString();
@@ -695,8 +706,8 @@ async function loadTokens(){
       +'<span class=tok-id title="'+esc(t.id)+'">'+esc(idShort)+'</span>'
       +'<span class=tok-time>'+ts+'</span>'
       +'<span class=tok-actions>'
-        +'<button class=btn-copy onclick="copyToken(\\''+t.id+'\\')">复制</button>'
-        +'<button class=btn-revoke onclick="revokeToken(\\''+t.id+'\\')">撤销</button>'
+        +'<button class=btn-copy onclick="copyToken(\''+t.id+'\')">复制</button>'
+        +'<button class=btn-revoke onclick="revokeToken(\''+t.id+'\')">撤销</button>'
       +'</span>'
     +'</div>';
   }).join('');
@@ -725,7 +736,7 @@ function copyToken(id){
 async function revokeToken(id){
   if(!confirm('确定撤销此令牌？对应的 Agent 将无法连接。'))return;
   try{
-    var r=await fetch('/revoke-token',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token:token,targetToken:[REDACTED]})});
+    var r=await fetch('/revoke-token',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token:token,targetToken:id})});
     var d=await r.json();
     if(d.ok){toast('令牌已撤销');L('令牌已撤销',true);loadTokens()}
     else{L('撤销失败: '+(d.error||'未知错误'),false)}
@@ -734,7 +745,7 @@ async function revokeToken(id){
 
 $$('logoutBtn').onclick=function(){
   if(ws)ws.close();
-  token=[REDACTED];devices={};tokenList=[];
+  token='';devices={};tokenList=[];
   $$('loginBlock').style.display='flex';
   $$('navBar').style.display='none';
   $$('dash').style.display='none';
