@@ -598,14 +598,14 @@ $$('loginForm').addEventListener('submit',async function(e){e.preventDefault();
     }else{$$('loginErr').textContent=d.error||'登录失败';$$('loginErr').style.display='block'}
   }catch(e){$$('loginErr').textContent='网络错误';$$('loginErr').style.display='block'}
   finally{btn.textContent=ot;btn.disabled=false}
-};
+});
 $$('p').onkeydown=function(e){if(e.key==='Enter')$$('loginBtn').click()};
 $$('u').onkeydown=function(e){if(e.key==='Enter')$$('p').focus()};
 
 function connect(){
   if(ws){try{ws.close()}catch(e){}}
   var proto=location.protocol==='https:'?'wss:':'ws:';
-  ws=new WebSocket(proto+'//'+location.host+'/ws?token=[REDACTED]已连接到服务器',true);ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}};
+  ws=new WebSocket(proto+'//'+location.host+'/ws?token='+token);ws.onopen=function(){L('已连接到服务器',true);ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}};
   ws.onmessage=function(e){try{handle(JSON.parse(e.data))}catch(ex){}};
   ws.onclose=function(){L('连接断开，5秒后重连…',false);if(!rTimer)rTimer=setTimeout(connect,5000)};
   ws.onerror=function(){};
