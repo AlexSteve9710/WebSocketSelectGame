@@ -494,18 +494,18 @@ button:disabled { opacity:.55; cursor:not-allowed; }
      登录页
      ============================================================ -->
 <div class="login-wrap" id="loginBlock">
-  <form class="login-card card" id="loginForm" autocomplete="on">
+  <div class="login-card card">
     <div class="login-brand">
       <h1>远程控制中心</h1>
       <p>使用管理员账号登录</p>
     </div>
     <label for="u">用户名</label>
-    <input id="u" name="username" autocomplete="username" placeholder="请输入用户名" autofocus required>
+    <input id="u" autocomplete="username" placeholder="请输入用户名" autofocus>
     <label for="p">密码</label>
-    <input id="p" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
-    <button id="loginBtn" class="btn-primary" type="submit">登录</button>
+    <input id="p" type="password" autocomplete="current-password" placeholder="请输入密码">
+    <button id="loginBtn" class="btn-primary" type="button">登录</button>
     <div class="login-err" id="loginErr"></div>
-  </form>
+  </div>
 </div>
 
 <!-- ============================================================
@@ -579,15 +579,15 @@ function $$(id){return document.getElementById(id)}
 function toast(msg,isErr){const t=$$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
 const logEl=$$('log'),grid=$$('grid');
 
-$$('loginForm').addEventListener('submit',async function(e){e.preventDefault();
+$$('loginBtn').onclick=async function(){
   const u=$$('u').value.trim(),p=$$('p').value.trim();
   if(!u||!p){$$('loginErr').textContent='请输入用户名和密码';$$('loginErr').style.display='block';return}
   const btn=$$('loginBtn'),ot=btn.textContent;btn.textContent='登录中…';btn.disabled=true;
   try{
-    const r=await fetch('/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:[REDACTED]})});
+    const r=await fetch('/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const d=await r.json();
     if(d.ok){
-      token=[REDACTED];
+      token=d.token;
       $$('loginBlock').style.display='none';
       $$('navBar').style.display='block';
       $$('dash').style.display='block';
@@ -598,19 +598,19 @@ $$('loginForm').addEventListener('submit',async function(e){e.preventDefault();
     }else{$$('loginErr').textContent=d.error||'登录失败';$$('loginErr').style.display='block'}
   }catch(e){$$('loginErr').textContent='网络错误';$$('loginErr').style.display='block'}
   finally{btn.textContent=ot;btn.disabled=false}
-});
+};
 $$('p').onkeydown=function(e){if(e.key==='Enter')$$('loginBtn').click()};
 $$('u').onkeydown=function(e){if(e.key==='Enter')$$('p').focus()};
 
 function connect(){
   if(ws){try{ws.close()}catch(e){}}
   var proto=location.protocol==='https:'?'wss:':'ws:';
-  ws=new WebSocket(proto+'//'+location.host+'/ws?token='+token);ws.onopen=function(){L('已连接到服务器',true);ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}};
-  ws.onmessage=function(e){try{handle(JSON.parse(e.data))}catch(ex){}};
-  ws.onclose=function(){L('连接断开，5秒后重连…',false);if(!rTimer)rTimer=setTimeout(connect,5000)};
-  ws.onerror=function(){};
+  ws=new WebSocket(proto+'//'+location.host+'/ws?token='+token);
+  ws.onopen=function(){L('已连接到服务器');ws.send(JSON.stringify({type:'browser_subscribe'}));if(rTimer){clearTimeout(rTimer);rTimer=null}}
+  ws.onmessage=function(e){try{handle(JSON.parse(e.data))}catch(ex){}}
+  ws.onclose=function(){L('连接断开，5秒后重连…');if(!rTimer)rTimer=setTimeout(connect,5000)}
+  ws.onerror=function(){}
 }
-
 function handle(m){
   switch(m.type){
     case'device_list':
